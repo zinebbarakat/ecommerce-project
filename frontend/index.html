@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shop</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">Shop</a>
+    <a href="cart.html">Cart</a>
+    <a href="admin.html">Admin</a>
+    <a href="login.html" id="logoutLink">Logout</a>
+  </nav>
+
+  <main class="container">
+    <h1>Products</h1>
+
+    <div class="card">
+      <h3>Filter by category</h3>
+
+      <div class="filters">
+        <label class="check">
+          <input type="checkbox" class="catCheck" value="Phones" />
+          Phones
+        </label>
+
+        <label class="check">
+          <input type="checkbox" class="catCheck" value="Laptops" />
+          Laptops
+        </label>
+
+        <label class="check">
+          <input type="checkbox" class="catCheck" value="Headphones" />
+          Headphones
+        </label>
+
+        <button id="loadBtn">Load Products</button>
+      </div>
+
+      <p id="msg" class="msg"></p>
+    </div>
+
+    <div id="products" class="grid"></div>
+  </main>
+
+  <script type="module">
+    import { initNav } from "./js/nav.js";
+    initNav();
+  </script>
+  <script type="module" src="js/products.js"></script>
+</body>
+</html>

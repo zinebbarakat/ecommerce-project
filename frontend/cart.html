@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cart</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html">Shop</a>
+    <a href="cart.html">Cart</a>
+    <a href="admin.html">Admin</a>
+    <a href="login.html" id="logoutLink">Logout</a>
+  </nav>
+
+  <main class="container">
+    <h1>Your Cart</h1>
+
+    <div class="card" style="max-width: 900px;">
+      <button id="refreshBtn">Refresh Cart</button>
+      <button id="checkoutBtn">Checkout</button>
+      <p id="msg" class="msg"></p>
+    </div>
+
+    <div id="cartItems" class="card" style="max-width: 900px; margin-top: 16px;"></div>
+  </main>
+<script type="module">
+  import { initNav } from "./js/nav.js";
+  initNav();
+</script>
+
+  <script type="module" src="js/cart.js"></script>
+</body>
+</html>
