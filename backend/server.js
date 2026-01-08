@@ -11,6 +11,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ ADD THIS
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  next();
+});
+
 app.use("/images", express.static("public/images"));
 
 app.use("/api/auth", authRoutes);
@@ -30,7 +36,6 @@ app.use((err, req, res, next) => {
 
 const PORT = 3000;
 
-// IMPORTANT: this keeps the server alive
 app.listen(PORT, () => {
   console.log(`API running on http://localhost:${PORT}`);
 });

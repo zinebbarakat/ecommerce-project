@@ -12,9 +12,13 @@ form.addEventListener("submit", async (e) => {
 
   try {
     const session = await loginUser({ username, password });
-    msg.textContent = `Logged in as ${session.username} (${session.role})`;
-    // go to shop
-    window.location.href = "index.html";
+
+    // Redirect based on role
+    if (session.role === "admin") {
+      window.location.href = "admin.html";
+    } else {
+      window.location.href = "index.html";
+    }
   } catch (err) {
     msg.textContent = err.message;
   }

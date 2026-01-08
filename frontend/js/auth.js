@@ -1,39 +1,19 @@
-import { apiFetch, setSession, clearSession, getSession } from "./api.js";
+import { apiFetch } from "./api.js";
 
-export async function registerUser(payload) {
-  const data = await apiFetch("/auth/register", {
+export async function registerUser({ username, password, role }) {
+  return apiFetch("/auth/register", {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ username, password, role })
   });
+}
+
+export async function loginUser({ username, password }) {
+  const data = await apiFetch("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ username, password })
+  });
+
+  // ✅ store session in localStorage (used by apiFetch headers)
+  localStorage.setItem("session", JSON.stringify(data));
   return data;
-}
-
-export async function loginUser(payload) {
-  const session = await apiFetch("/auth/login", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
-  setSession(session);
-  return session;
-}
-
-export function logout() {
-  clearSession();
-}
-
-export function requireLogin() {
-  const s = getSession();
-  if (!s) {
-    window.location.href = "login.html";
-  }
-  return s;
-}
-
-export function requireAdmin() {
-  const s = requireLogin();
-  if (s.role !== "admin") {
-    alert("Admin only");
-    window.location.href = "index.html";
-  }
-  return s;
 }

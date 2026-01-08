@@ -3,27 +3,29 @@ const db = require("../models/db");
 // GET /api/products?category=Phones
 // GET /api/products?categories=Phones,Laptops
 function getAll(req, res) {
+  console.log("DEBUG getAll query:", req.query);
+
   const { category, categories } = req.query;
 
   let sql = "SELECT * FROM products";
   const params = [];
 
-  // Multi-category filter: categories=Phones,Laptops
+  const normalize = (s) => String(s).trim().toLowerCase();
+
   if (categories) {
     const list = String(categories)
       .split(",")
-      .map((c) => c.trim())
+      .map(normalize)
       .filter(Boolean);
 
     if (list.length > 0) {
       const placeholders = list.map(() => "?").join(",");
-      sql += ` WHERE category IN (${placeholders})`;
+      sql += ` WHERE LOWER(TRIM(category)) IN (${placeholders})`;
       params.push(...list);
     }
   } else if (category) {
-    // Single-category filter: category=Phones
-    sql += " WHERE category = ?";
-    params.push(String(category).trim());
+    sql += " WHERE LOWER(TRIM(category)) = ?";
+    params.push(normalize(category));
   }
 
   sql += " ORDER BY id DESC";
