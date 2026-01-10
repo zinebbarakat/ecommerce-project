@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cart</title>
+  <title>Order Details</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
@@ -17,25 +17,27 @@
   </nav>
 
   <main class="container">
-    <h1>Your Cart</h1>
+    <h1>Order Details</h1>
+    <p id="msg" class="msg"></p>
 
-    <div class="card">
-      <div class="filters">
-        <button id="checkoutBtn" type="button">Checkout</button>
-      </div>
-
-      <p id="msg" class="msg"></p>
-      <p id="total"></p>
+    <div class="card" style="max-width: 900px;">
+      <p><b>Order ID:</b> <span id="orderId">-</span></p>
+      <p><b>Date:</b> <span id="orderDate">-</span></p>
+      <p><b>Total:</b> <span id="orderTotal">-</span></p>
     </div>
 
-    <div id="cart" class="grid"></div>
+    <h2 style="margin-top: 16px;">Items</h2>
+    <div id="items" class="card" style="max-width: 900px;"></div>
+
+    <p style="margin-top: 16px;">
+      <a href="orders.html">← Back to My Orders</a>
+    </p>
   </main>
 
   <script type="module">
     import { initNav } from "./js/nav.js";
     initNav();
   </script>
-
-  <script type="module" src="js/cart.js"></script>
+  <script type="module" src="js/order-details.js"></script>
 </body>
 </html>

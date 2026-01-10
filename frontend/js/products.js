@@ -5,7 +5,7 @@ const msg = document.getElementById("msg");
 const loadBtn = document.getElementById("loadBtn");
 const logoutLink = document.getElementById("logoutLink");
 
-// NEW: category checkboxes
+// category checkboxes
 const catChecks = () => Array.from(document.querySelectorAll(".catCheck"));
 
 function goToDetail(productId) {
@@ -20,6 +20,9 @@ function renderProducts(products) {
     return;
   }
 
+  const session = getSession();
+  const isAdmin = session?.role === "admin";
+
   for (const p of products) {
     const card = document.createElement("div");
     card.className = "product";
@@ -32,7 +35,11 @@ function renderProducts(products) {
       <p><b>Price:</b> ${p.price} €</p>
       <p><b>Stock:</b> ${p.stock}</p>
 
-      <button class="addBtn">Add to Cart</button>
+      ${
+        isAdmin
+          ? `<p class="msg" style="margin-top:10px;">Admin view: purchasing is disabled.</p>`
+          : `<button class="addBtn" type="button">Add to Cart</button>`
+      }
     `;
 
     // Click to product detail
@@ -43,25 +50,33 @@ function renderProducts(products) {
     img.addEventListener("click", () => goToDetail(p.id));
     title.addEventListener("click", () => goToDetail(p.id));
 
-    // Add to cart
+    // Add to cart (users only)
     const btn = card.querySelector(".addBtn");
-    btn.addEventListener("click", async () => {
-      const session = getSession();
-      if (!session) {
-        window.location.href = "login.html";
-        return;
-      }
+    if (btn) {
+      btn.addEventListener("click", async () => {
+        const sessionNow = getSession();
+        if (!sessionNow) {
+          window.location.href = "login.html";
+          return;
+        }
 
-      try {
-        await apiFetch("/orders/me/cart/items", {
-          method: "POST",
-          body: JSON.stringify({ product_id: p.id, quantity: 1 })
-        });
-        alert("Added to cart!");
-      } catch (err) {
-        alert(err.message);
-      }
-    });
+        // extra safety: if admin somehow sees it, block
+        if (sessionNow.role === "admin") {
+          alert("Admins cannot place orders.");
+          return;
+        }
+
+        try {
+          await apiFetch("/orders/me/cart/items", {
+            method: "POST",
+            body: JSON.stringify({ product_id: p.id, quantity: 1 }),
+          });
+          alert("Added to cart!");
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    }
 
     productsDiv.appendChild(card);
   }
@@ -70,13 +85,11 @@ function renderProducts(products) {
 async function loadProducts() {
   msg.textContent = "";
 
-  // Build multi-category query from checked boxes
   const selected = catChecks()
     .filter((c) => c.checked)
     .map((c) => c.value);
 
   try {
-    // If none selected => show all
     const path =
       selected.length > 0
         ? `/products?categories=${encodeURIComponent(selected.join(","))}`
@@ -96,9 +109,5 @@ logoutLink.addEventListener("click", (e) => {
 });
 
 loadBtn.addEventListener("click", loadProducts);
-
-// Optional: auto-load when changing checkboxes (nice UX)
 catChecks().forEach((c) => c.addEventListener("change", loadProducts));
-
-// Load products on page open
 loadProducts();

@@ -1,27 +1,52 @@
-import { getSession } from "./api.js";
+import { getSession, clearSession } from "./api.js";
 
 export function initNav() {
   const session = getSession();
 
-  // If not logged in, hide Admin + Cart links (optional but clean)
-  const adminLink = document.querySelector('a[href="admin.html"]');
-  const cartLink = document.querySelector('a[href="cart.html"]');
+  const logoutLink = document.getElementById("logoutLink");
 
+  // Handle logout
+  if (logoutLink) {
+    logoutLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      clearSession();
+      window.location.href = "login.html";
+    });
+  }
+
+  // If not logged in → hide protected links
   if (!session) {
-    if (adminLink) adminLink.style.display = "none";
-    if (cartLink) cartLink.style.display = "none";
-  } else {
-    if (adminLink && session.role !== "admin") adminLink.style.display = "none";
+    hideLink("cart.html");
+    hideLink("orders.html");
+    hideLink("admin.html");
+    return;
   }
 
-  // Show "Logged in as ..."
-  const nav = document.querySelector(".nav");
-  if (nav) {
-    const info = document.createElement("span");
+  // Show who is logged in
+  let info = document.getElementById("navUserInfo");
+  if (!info) {
+    info = document.createElement("span");
+    info.id = "navUserInfo";
     info.style.marginLeft = "auto";
-    info.style.fontWeight = "700";
-    info.style.color = "#6b7280";
-    info.textContent = session ? `Logged in: ${session.username} (${session.role})` : "Not logged in";
-    nav.appendChild(info);
+    info.textContent = `Logged in as ${session.username} (${session.role})`;
+
+    const nav = document.querySelector(".nav");
+    if (nav) nav.appendChild(info);
   }
+
+  // Role-based visibility
+  if (session.role === "admin") {
+    // Admin: NO cart / orders
+    hideLink("cart.html");
+    hideLink("orders.html");
+  } else {
+    // User: NO admin
+    hideLink("admin.html");
+  }
+}
+
+function hideLink(href) {
+  document.querySelectorAll(`a[href="${href}"]`).forEach((a) => {
+    a.style.display = "none";
+  });
 }

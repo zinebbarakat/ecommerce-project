@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cart</title>
+  <title>My Orders</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-
 <body>
   <nav class="nav">
     <a href="index.html">Shop</a>
@@ -17,25 +16,15 @@
   </nav>
 
   <main class="container">
-    <h1>Your Cart</h1>
-
-    <div class="card">
-      <div class="filters">
-        <button id="checkoutBtn" type="button">Checkout</button>
-      </div>
-
-      <p id="msg" class="msg"></p>
-      <p id="total"></p>
-    </div>
-
-    <div id="cart" class="grid"></div>
+    <h1>My Past Orders</h1>
+    <p id="msg" class="msg"></p>
+    <div id="orders" class="grid"></div>
   </main>
 
   <script type="module">
     import { initNav } from "./js/nav.js";
     initNav();
   </script>
-
-  <script type="module" src="js/cart.js"></script>
+  <script type="module" src="js/orders.js"></script>
 </body>
 </html>

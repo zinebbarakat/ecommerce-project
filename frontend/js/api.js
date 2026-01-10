@@ -20,17 +20,28 @@ export async function apiFetch(path, options = {}) {
     ...(options.headers || {})
   };
 
-  // Attach session headers if logged in (your backend expects these)
-  if (session?.id) headers["x-user-id"] = String(session.id);
-  if (session?.role) headers["x-user-role"] = String(session.role);
+  // 🔐 SAFELY attach auth headers (supports all session shapes)
+  const userId =
+    session?.id ??
+    session?.user_id ??
+    session?.userId ??
+    session?.user?.id;
+
+  const role =
+    session?.role ??
+    session?.user_role ??
+    session?.userRole ??
+    session?.user?.role;
+
+  if (userId) headers["x-user-id"] = String(userId);
+  if (role) headers["x-user-role"] = String(role);
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
-    cache: "no-store" // IMPORTANT: avoid 304 cache issues
+    cache: "no-store" // 🚫 disable browser cache
   });
 
-  // Handle non-JSON safely
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {

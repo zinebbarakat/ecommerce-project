@@ -1,134 +1,115 @@
-import { apiFetch, getSession, clearSession } from "./api.js";
+import { apiFetch, getSession } from "./api.js";
 
 const msg = document.getElementById("msg");
-const cartItemsDiv = document.getElementById("cartItems");
-const refreshBtn = document.getElementById("refreshBtn");
+const cartDiv = document.getElementById("cart");
+const totalEl = document.getElementById("total");
 const checkoutBtn = document.getElementById("checkoutBtn");
-const logoutLink = document.getElementById("logoutLink");
 
-function requireSession() {
-  const s = getSession();
-  if (!s) {
-    window.location.href = "login.html";
-    throw new Error("Not logged in");
+function computeTotal(items) {
+  let total = 0;
+  for (const it of items) {
+    total += (Number(it.price) || 0) * (Number(it.quantity) || 0);
   }
-  return s;
+  return total;
 }
 
-function renderCart(cart) {
-  if (!cart.items || cart.items.length === 0) {
-    cartItemsDiv.innerHTML = `<p>Your cart is empty.</p>`;
+function renderCart(items) {
+  cartDiv.innerHTML = "";
+
+  if (!items.length) {
+    cartDiv.innerHTML = `<p>Your cart is empty.</p>`;
+    totalEl.textContent = "Total: 0 €";
     return;
   }
 
-  let html = `
-    <h3>Cart Items</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Unit Price</th>
-          <th>Qty</th>
-          <th>Subtotal</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+  for (const it of items) {
+    const card = document.createElement("div");
+    card.className = "product";
 
-  for (const item of cart.items) {
-    const subtotal = item.quantity * item.unit_price;
-    html += `
-      <tr>
-        <td>${item.name}</td>
-        <td>${item.unit_price} €</td>
-        <td>
-          <input type="number" min="0" value="${item.quantity}" data-product-id="${item.product_id}" class="qtyInput" />
-        </td>
-        <td>${subtotal} €</td>
-        <td><button class="removeBtn" data-product-id="${item.product_id}">Remove</button></td>
-      </tr>
+    card.innerHTML = `
+      <img src="http://localhost:3000${it.image_url}" alt="${it.name}" />
+      <h3>${it.name}</h3>
+      <p><b>Price:</b> ${it.price} €</p>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <label>
+          Qty:
+          <input type="number" min="0" value="${it.quantity}" style="width:80px;" />
+        </label>
+        <button class="removeBtn" type="button">Remove</button>
+      </div>
     `;
-  }
 
-  html += `
-      </tbody>
-    </table>
-    <h3>Total: ${cart.total} €</h3>
-    <p><small>Tip: set quantity to 0 to remove an item.</small></p>
-  `;
+    const qtyInput = card.querySelector("input");
+    const removeBtn = card.querySelector(".removeBtn");
 
-  cartItemsDiv.innerHTML = html;
-
-  // qty change handlers
-  document.querySelectorAll(".qtyInput").forEach((input) => {
-    input.addEventListener("change", async (e) => {
-      msg.textContent = "";
-      const productId = e.target.getAttribute("data-product-id");
-      const quantity = Number(e.target.value);
+    qtyInput.addEventListener("change", async () => {
+      const q = Number(qtyInput.value);
 
       try {
-        requireSession();
-        await apiFetch(`/orders/me/cart/items/${productId}`, {
+        await apiFetch(`/orders/me/cart/items/${it.product_id}`, {
           method: "PUT",
-          body: JSON.stringify({ quantity })
+          body: JSON.stringify({ quantity: q })
         });
         await loadCart();
       } catch (err) {
-        msg.textContent = err.message;
+        alert(err.message);
       }
     });
-  });
 
-  // remove button handlers
-  document.querySelectorAll(".removeBtn").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      msg.textContent = "";
-      const productId = e.target.getAttribute("data-product-id");
+    removeBtn.addEventListener("click", async () => {
       try {
-        requireSession();
-        await apiFetch(`/orders/me/cart/items/${productId}`, {
+        await apiFetch(`/orders/me/cart/items/${it.product_id}`, {
           method: "PUT",
           body: JSON.stringify({ quantity: 0 })
         });
         await loadCart();
       } catch (err) {
-        msg.textContent = err.message;
+        alert(err.message);
       }
     });
-  });
+
+    cartDiv.appendChild(card);
+  }
+
+  totalEl.textContent = `Total: ${computeTotal(items)} €`;
 }
 
 async function loadCart() {
   msg.textContent = "";
+
+  const session = getSession();
+  if (!session) {
+    window.location.href = "login.html";
+    return;
+  }
+
   try {
-    requireSession();
-    const cart = await apiFetch("/orders/me/cart");
-    renderCart(cart);
+    const rows = await apiFetch("/orders/me/cart");
+
+    // Your backend uses LEFT JOIN so sometimes rows can have null product_id
+    const items = rows.filter(
+      (r) => r.product_id != null && Number(r.quantity) > 0
+    );
+
+    renderCart(items);
   } catch (err) {
     msg.textContent = err.message;
   }
 }
 
-refreshBtn.addEventListener("click", loadCart);
+
 
 checkoutBtn.addEventListener("click", async () => {
   msg.textContent = "";
   try {
-    requireSession();
-    const res = await apiFetch("/orders/me/checkout", { method: "POST" });
-    alert(`Checkout successful! Order ID: ${res.order_id}`);
-    await loadCart(); // new cart will be created automatically
+    const result = await apiFetch("/orders/me/checkout", { method: "POST" });
+    alert(result.message || "Sent to admin for confirmation.");
+
+    await loadCart();
   } catch (err) {
     msg.textContent = err.message;
   }
 });
 
-logoutLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  clearSession();
-  window.location.href = "login.html";
-});
-
-// Load cart on page open
 loadCart();
