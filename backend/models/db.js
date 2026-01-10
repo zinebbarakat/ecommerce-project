@@ -1,11 +1,23 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
+// Absolute path to the SQLite database file
 const dbPath = path.join(__dirname, "..", "database.db");
-const db = new sqlite3.Database(dbPath);
+
+// Open (or create) the database
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error("Failed to open database:", err.message);
+  } else {
+    console.log("Connected to SQLite database:", dbPath);
+  }
+});
 
 db.serialize(() => {
-  // USERS (login/register + roles)
+  // (Optional but recommended) enforce foreign keys in SQLite
+  db.run("PRAGMA foreign_keys = ON");
+
+  // USERS: authentication + roles
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,7 +31,7 @@ db.serialize(() => {
     )
   `);
 
-  // PRODUCTS (catalog)
+  // PRODUCTS: product catalog
   db.run(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +46,8 @@ db.serialize(() => {
     )
   `);
 
-  // ORDERS: required CART/ORDER status
+  // ORDERS: we store cart + confirmed order using status
+  // CART = temporary active cart, ORDER = confirmed order
   db.run(`
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +58,8 @@ db.serialize(() => {
     )
   `);
 
-  // ORDER ITEMS: product quantities inside an order/cart
+  // ORDER ITEMS: products inside a cart/order
+  // UNIQUE(order_id, product_id) prevents duplicates (we update quantity instead)
   db.run(`
     CREATE TABLE IF NOT EXISTS order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

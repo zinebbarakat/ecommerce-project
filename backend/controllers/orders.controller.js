@@ -1,6 +1,6 @@
 const db = require("../models/db");
 
-// Helper: get or create cart order id
+// Get existing cart ID or create a new CART order for this user
 function getCartId(userId, cb) {
   db.get(
     "SELECT id FROM orders WHERE user_id = ? AND status = 'CART'",
@@ -22,8 +22,8 @@ function getCartId(userId, cb) {
 }
 
 // --------------------
-// GET /api/orders/me/cart
-// returns cart items (only real items)
+// USER: GET /api/orders/me/cart
+// Return cart items for current user
 // --------------------
 function getMyCart(req, res) {
   const userId = req.user.id;
@@ -54,8 +54,9 @@ function getMyCart(req, res) {
 }
 
 // --------------------
-// POST /api/orders/me/cart/items
+// USER: POST /api/orders/me/cart/items
 // body: { product_id, quantity }
+// Add to cart (creates CART if needed)
 // --------------------
 function addToCart(req, res) {
   const userId = req.user.id;
@@ -65,12 +66,12 @@ function addToCart(req, res) {
   const qty = Number(quantity);
 
   if (!pid || !Number.isFinite(qty) || qty <= 0) {
-    return res
-      .status(400)
-      .json({ error: "product_id and quantity (>0) required" });
+    return res.status(400).json({
+      error: "product_id and quantity (>0) required"
+    });
   }
 
-  // ensure product exists + get price (needed for order_items.unit_price)
+  // We store unit_price in order_items (price at time of adding)
   db.get("SELECT id, price FROM products WHERE id = ?", [pid], (err, prod) => {
     if (err) {
       console.error("addToCart product lookup error:", err);
@@ -86,8 +87,9 @@ function addToCart(req, res) {
         return res.status(500).json({ error: "Database error" });
       }
 
+      // If product already exists in cart, increase quantity
       db.get(
-        "SELECT id, quantity FROM order_items WHERE order_id = ? AND product_id = ?",
+        "SELECT id FROM order_items WHERE order_id = ? AND product_id = ?",
         [cartId, pid],
         (err, item) => {
           if (err) {
@@ -127,9 +129,9 @@ function addToCart(req, res) {
 }
 
 // --------------------
-// PUT /api/orders/me/cart/items/:productId
+// USER: PUT /api/orders/me/cart/items/:productId
 // body: { quantity }
-// If quantity <= 0 => DELETE item (real remove)
+// quantity <= 0 => remove item
 // --------------------
 function updateItem(req, res) {
   const userId = req.user.id;
@@ -140,7 +142,6 @@ function updateItem(req, res) {
     return res.status(400).json({ error: "Valid quantity required" });
   }
 
-  // find cart
   db.get(
     "SELECT id FROM orders WHERE user_id = ? AND status = 'CART'",
     [userId],
@@ -151,7 +152,7 @@ function updateItem(req, res) {
       }
       if (!cart) return res.status(404).json({ error: "No active cart" });
 
-      // remove item
+      // Remove item
       if (qty <= 0) {
         db.run(
           "DELETE FROM order_items WHERE order_id = ? AND product_id = ?",
@@ -161,13 +162,13 @@ function updateItem(req, res) {
               console.error("updateItem delete order_items error:", err);
               return res.status(500).json({ error: "Database error" });
             }
-            res.json({ ok: true });
+            return res.json({ ok: true });
           }
         );
         return;
       }
 
-      // update quantity
+      // Update quantity
       db.run(
         "UPDATE order_items SET quantity = ? WHERE order_id = ? AND product_id = ?",
         [qty, cart.id, productId],
@@ -176,8 +177,9 @@ function updateItem(req, res) {
             console.error("updateItem update order_items error:", err);
             return res.status(500).json({ error: "Database error" });
           }
-          if (this.changes === 0)
+          if (this.changes === 0) {
             return res.status(404).json({ error: "Item not found in cart" });
+          }
           res.json({ ok: true });
         }
       );
@@ -186,13 +188,13 @@ function updateItem(req, res) {
 }
 
 // --------------------
-// POST /api/orders/me/checkout
-// CART -> ORDER (refuse empty carts)
+// USER: POST /api/orders/me/checkout
+// In this project, checkout does NOT confirm the order.
+// Admin will confirm CART -> ORDER.
 // --------------------
 function checkout(req, res) {
   const userId = req.user.id;
 
-  // Find active CART
   db.get(
     "SELECT id FROM orders WHERE user_id = ? AND status = 'CART'",
     [userId],
@@ -200,7 +202,6 @@ function checkout(req, res) {
       if (err) return res.status(500).json({ error: "Database error" });
       if (!cart) return res.status(400).json({ error: "Cart is empty" });
 
-      // Ensure it has at least one item
       db.get(
         "SELECT COUNT(*) AS cnt FROM order_items WHERE order_id = ? AND quantity > 0",
         [cart.id],
@@ -208,8 +209,7 @@ function checkout(req, res) {
           if (err) return res.status(500).json({ error: "Database error" });
           if (!row || row.cnt === 0) return res.status(400).json({ error: "Cart is empty" });
 
-          // Do NOT change status here. Admin will confirm CART -> ORDER.
-          return res.json({
+          res.json({
             ok: true,
             message: "Order request sent. Waiting for admin confirmation."
           });
@@ -219,10 +219,9 @@ function checkout(req, res) {
   );
 }
 
-
 // --------------------
-// GET /api/orders/me/orders
-// list past orders with computed total
+// USER: GET /api/orders/me/orders
+// List confirmed orders (status = ORDER) with totals
 // --------------------
 function getMyOrders(req, res) {
   const userId = req.user.id;
@@ -232,10 +231,9 @@ function getMyOrders(req, res) {
       o.id,
       o.status,
       o.created_at,
-      COALESCE(SUM(p.price * oi.quantity), 0) AS total
+      COALESCE(SUM(oi.quantity * oi.unit_price), 0) AS total
     FROM orders o
     LEFT JOIN order_items oi ON oi.order_id = o.id AND oi.quantity > 0
-    LEFT JOIN products p ON p.id = oi.product_id
     WHERE o.user_id = ? AND o.status = 'ORDER'
     GROUP BY o.id
     ORDER BY o.id DESC
@@ -249,19 +247,17 @@ function getMyOrders(req, res) {
     res.json(rows);
   });
 }
+
 // --------------------
-// GET /api/orders/me/orders/:orderId
-// view details of ONE past order (items + totals)
+// USER: GET /api/orders/me/orders/:orderId
+// Details of one confirmed order (items + total)
 // --------------------
 function getMyOrderDetails(req, res) {
   const userId = req.user.id;
   const orderId = Number(req.params.orderId);
 
-  if (!orderId) {
-    return res.status(400).json({ error: "Invalid orderId" });
-  }
+  if (!orderId) return res.status(400).json({ error: "Invalid orderId" });
 
-  // Check order belongs to user and is confirmed
   db.get(
     "SELECT id, status, created_at FROM orders WHERE id = ? AND user_id = ? AND status = 'ORDER'",
     [orderId, userId],
@@ -270,10 +266,7 @@ function getMyOrderDetails(req, res) {
         console.error("getMyOrderDetails order lookup error:", err);
         return res.status(500).json({ error: "Database error" });
       }
-
-      if (!order) {
-        return res.status(404).json({ error: "Order not found" });
-      }
+      if (!order) return res.status(404).json({ error: "Order not found" });
 
       const itemsSql = `
         SELECT
@@ -292,23 +285,16 @@ function getMyOrderDetails(req, res) {
           return res.status(500).json({ error: "Database error" });
         }
 
-        const total = items.reduce(
-          (sum, it) => sum + Number(it.line_total || 0),
-          0
-        );
-
-        res.json({
-          order,
-          items,
-          total
-        });
+        const total = items.reduce((sum, it) => sum + Number(it.line_total || 0), 0);
+        res.json({ order, items, total });
       });
     }
   );
 }
+
 // --------------------
 // ADMIN: GET /api/orders/admin/orders
-// Optional query: ?status=ORDER or ?status=CONFIRMED
+// Optional: ?status=CART or ?status=ORDER
 // --------------------
 function adminListOrders(req, res) {
   const status = req.query.status ? String(req.query.status).toUpperCase() : null;
@@ -324,8 +310,7 @@ function adminListOrders(req, res) {
     FROM orders o
     LEFT JOIN users u ON u.id = o.user_id
     LEFT JOIN order_items oi ON oi.order_id = o.id AND oi.quantity > 0
-   WHERE o.status IN ('CART','ORDER')
-
+    WHERE o.status IN ('CART','ORDER')
   `;
   const params = [];
 
@@ -350,7 +335,7 @@ function adminListOrders(req, res) {
 
 // --------------------
 // ADMIN: GET /api/orders/admin/orders/:orderId
-// View order + items (for any user)
+// View order + items (CART or ORDER)
 // --------------------
 function adminOrderDetails(req, res) {
   const orderId = Number(req.params.orderId);
@@ -361,7 +346,7 @@ function adminOrderDetails(req, res) {
     SELECT o.id, o.user_id, u.username, o.status, o.created_at
     FROM orders o
     LEFT JOIN users u ON u.id = o.user_id
-    WHERE o.id = ? AND o.status != 'CART'
+    WHERE o.id = ? AND o.status IN ('CART','ORDER')
     `,
     [orderId],
     (err, order) => {
@@ -401,7 +386,7 @@ function adminOrderDetails(req, res) {
 
 // --------------------
 // ADMIN: PUT /api/orders/admin/orders/:orderId/confirm
-// Sets status ORDER -> CONFIRMED
+// Confirm cart: CART -> ORDER
 // --------------------
 function adminConfirmOrder(req, res) {
   const orderId = Number(req.params.orderId);
@@ -423,8 +408,6 @@ function adminConfirmOrder(req, res) {
   );
 }
 
-
-
 module.exports = {
   getMyCart,
   addToCart,
@@ -436,4 +419,3 @@ module.exports = {
   adminOrderDetails,
   adminConfirmOrder
 };
-
