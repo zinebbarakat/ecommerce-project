@@ -73,7 +73,9 @@ ecommerce-project/
 │   │   ├── products.routes.js
 │   │   └── orders.routes.js
 │   └── public/
-│       └── images/               # Product images
+│   │   └── images/               # Product images
+│   ├── package.json              # Backend dependencies
+│   └── package-lock.json         # Auto-generated lock file
 │
 ├── frontend/
 │   ├── index.html                # Home page with product catalog
@@ -248,6 +250,7 @@ The frontend is a static website. You can open it using:
    - Update existing product information
    - Delete products from catalog
    - Manage stock levels
+   - NOTE: admin cannot purchase 
 
 2. **Order Management**:
    - View all customer orders
@@ -295,6 +298,7 @@ The frontend is a static website. You can open it using:
 - View all orders from all users
 - Update order status
 - Access: Admin Dashboard
+- Exception: Cannot purchase products
 
 ## DATABASE SCHEMA
 
