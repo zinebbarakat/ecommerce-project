@@ -3,6 +3,8 @@ import { apiFetch, getSession, clearSession } from "./api.js";
 const productsDiv = document.getElementById("products");
 const msg = document.getElementById("msg");
 const loadBtn = document.getElementById("loadBtn");
+const clearBtn = document.getElementById("clearBtn");
+const resultsCount = document.getElementById("resultsCount");
 const logoutLink = document.getElementById("logoutLink");
 
 // category checkboxes
@@ -12,8 +14,13 @@ function goToDetail(productId) {
   window.location.href = `product.html?id=${productId}`;
 }
 
+function setCount(n) {
+  if (resultsCount) resultsCount.textContent = String(n);
+}
+
 function renderProducts(products) {
   productsDiv.innerHTML = "";
+  setCount(products.length);
 
   if (!products.length) {
     productsDiv.innerHTML = `<p>No products found.</p>`;
@@ -27,9 +34,14 @@ function renderProducts(products) {
     const card = document.createElement("div");
     card.className = "product";
 
+    // Make the whole card clickable (details), but not the button
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", `View details for ${p.name}`);
+
     card.innerHTML = `
-      <img class="clickableImg" src="http://localhost:3000${p.image_url}" alt="${p.name}" />
-      <h3 class="clickableTitle">${p.name}</h3>
+      <img src="http://localhost:3000${p.image_url}" alt="${p.name}" />
+      <h3>${p.name}</h3>
 
       <p><b>Category:</b> ${p.category}</p>
       <p><b>Price:</b> ${p.price} €</p>
@@ -42,25 +54,30 @@ function renderProducts(products) {
       }
     `;
 
-    // Click to product detail
-    const img = card.querySelector(".clickableImg");
-    const title = card.querySelector(".clickableTitle");
-    img.style.cursor = "pointer";
-    title.style.cursor = "pointer";
-    img.addEventListener("click", () => goToDetail(p.id));
-    title.addEventListener("click", () => goToDetail(p.id));
+    // Card click -> detail
+    card.addEventListener("click", () => goToDetail(p.id));
 
-    // Add to cart (users only)
+    // Keyboard accessibility (Enter / Space)
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goToDetail(p.id);
+      }
+    });
+
+    // Add to cart (users only) - stop click bubbling to card
     const btn = card.querySelector(".addBtn");
     if (btn) {
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+
         const sessionNow = getSession();
         if (!sessionNow) {
           window.location.href = "login.html";
           return;
         }
 
-        // extra safety: if admin somehow sees it, block
+        // extra safety
         if (sessionNow.role === "admin") {
           alert("Admins cannot place orders.");
           return;
@@ -99,7 +116,16 @@ async function loadProducts() {
     renderProducts(products);
   } catch (err) {
     msg.textContent = err.message;
+    setCount(0);
   }
+}
+
+// Clear filters -> show all products
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    catChecks().forEach((c) => (c.checked = false));
+    loadProducts();
+  });
 }
 
 logoutLink.addEventListener("click", (e) => {
@@ -108,6 +134,7 @@ logoutLink.addEventListener("click", (e) => {
   window.location.href = "login.html";
 });
 
-loadBtn.addEventListener("click", loadProducts);
+if (loadBtn) loadBtn.addEventListener("click", loadProducts);
 catChecks().forEach((c) => c.addEventListener("change", loadProducts));
+
 loadProducts();

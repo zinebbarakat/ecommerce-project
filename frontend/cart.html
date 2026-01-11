@@ -2,38 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart — Zaza’s Tech House</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-  <nav class="nav">
-    <a href="index.html">Shop</a>
-    <a href="cart.html">Cart</a>
-    <a href="orders.html">My Orders</a>
-    <a href="admin.html">Admin</a>
-    <a href="login.html" id="logoutLink">Logout</a>
-  </nav>
+  <!-- Header: brand + navigation -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
 
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+
+        <a href="cart.html" data-auth="user" aria-current="page">Cart</a>
+        <a href="orders.html" data-auth="user">My Orders</a>
+        <a href="admin.html" data-auth="admin">Admin</a>
+
+        <!-- nav.js switches this between Login/Logout -->
+        <a href="login.html" id="logoutLink">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
   <main class="container">
-    <h1>Your Cart</h1>
+    <header class="pageHeader">
+      <h1>Your Cart</h1>
+      <p class="muted">Review your selected items and proceed to checkout.</p>
+    </header>
 
-    <div class="card">
-      <div class="filters">
-        <button id="checkoutBtn" type="button">Checkout</button>
+    <!-- Cart actions + total -->
+    <section class="card" aria-label="Cart actions">
+      <div class="actions">
+        <button id="checkoutBtn" type="button" class="btnPrimary">Checkout</button>
+        <a href="index.html#catalog">Continue shopping</a>
       </div>
 
-      <p id="msg" class="msg"></p>
-      <p id="total"></p>
-    </div>
+      <p class="muted" style="margin: 10px 0 0;">
+        After checkout, your order will wait for admin confirmation.
+      </p>
 
-    <div id="cart" class="grid"></div>
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
+
+      <div class="totalLine" aria-label="Cart total">
+        <span>Total</span>
+        <span id="total">0 €</span>
+      </div>
+    </section>
+
+    <!-- Cart items (filled by cart.js) -->
+    <section class="card" aria-label="Cart items">
+      <div id="cart" class="grid"></div>
+    </section>
   </main>
 
+  <!-- Footer -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Phones • Laptops • Headphones • Tablets</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
   <script type="module">
     import { initNav } from "./js/nav.js";
     initNav();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 
   <script type="module" src="js/cart.js"></script>

@@ -3,100 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin</title>
+  <title>Admin — Zaza’s Tech House</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-  <nav class="nav">
-  <a href="index.html">Shop</a>
-  <a href="admin.html">Admin</a>
-  <a href="login.html" id="logoutLink">Logout</a>
-</nav>
 
+  <!-- ===== Header ===== -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
 
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+
+        <a href="cart.html" data-auth="user">Cart</a>
+        <a href="orders.html" data-auth="user">My Orders</a>
+        <a href="admin.html" data-auth="admin" aria-current="page">Admin</a>
+
+        <a href="login.html" id="logoutLink">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
   <main class="container">
-    <h1>Admin Panel</h1>
-    <p id="msg" class="msg"></p>
 
-    <!-- -------------------- -->
-    <!-- Products management -->
-    <!-- -------------------- -->
-    <div class="card" style="max-width: 900px;">
-      <h3>Create / Update Product</h3>
+    <header class="pageHeader">
+      <h1>Admin Panel</h1>
+      <p class="muted">Manage products and confirm user carts into orders.</p>
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
+    </header>
 
-      <form id="productForm">
+    <!-- ==================== -->
+    <!-- Products management  -->
+    <!-- ==================== -->
+    <section class="card" aria-label="Product management">
+      <h2>Products</h2>
+      <p class="muted">Create new products or update existing ones.</p>
+
+      <form id="productForm" autocomplete="off">
         <input type="hidden" id="productId" />
 
-        <label>Name
-          <input id="name" required />
-        </label>
+        <div class="formGrid">
+          <label for="name">
+            Name
+            <input id="name" required />
+          </label>
 
-        <label>Category
-          <input id="category" required />
-        </label>
+          <label for="category">
+            Category
+            <input id="category" required placeholder="Phones / Laptops / Headphones / Tablets" />
+          </label>
 
-        <label>Price
-          <input id="price" type="number" step="0.01" required />
-        </label>
+          <label for="price">
+            Price (€)
+            <input id="price" type="number" step="0.01" min="0" required />
+          </label>
 
-        <label>Stock
-          <input id="stock" type="number" required />
-        </label>
+          <label for="stock">
+            Stock
+            <input id="stock" type="number" min="0" required />
+          </label>
+        </div>
 
-        <label>Image URL (e.g. /images/iphone.jpg)
+        <label for="image_url">
+          Image URL (example: /images/iphone.jpg)
           <input id="image_url" required />
         </label>
 
-        <label>Short description
+        <label for="short_desc">
+          Short description
           <input id="short_desc" />
         </label>
 
-        <label>Long description
-          <input id="long_desc" />
+        <label for="long_desc">
+          Long description
+          <textarea id="long_desc"></textarea>
         </label>
 
-        <div style="display:flex; gap:10px; margin-top:10px;">
-          <button type="submit" id="saveBtn">Save</button>
+        <div class="actions">
+          <button type="submit" id="saveBtn" class="btnPrimary">Save</button>
           <button type="button" id="clearBtn">Clear</button>
         </div>
       </form>
-    </div>
+    </section>
 
-    <div class="card" style="max-width: 900px; margin-top: 16px;">
-      <h3>Existing Products</h3>
+    <section class="card" aria-label="Existing products">
+      <h2>Existing Products</h2>
+      <p class="muted">Edit or delete products from the catalog.</p>
       <div id="adminProducts" class="grid"></div>
-    </div>
+    </section>
 
-    <!-- -------------------- -->
-    <!-- Orders management -->
-    <!-- -------------------- -->
-    <h2 style="margin-top:24px;">Orders Management</h2>
+    <!-- ==================== -->
+    <!-- Orders management    -->
+    <!-- ==================== -->
+    <section class="card" aria-label="Orders management">
+      <h2>Orders Management</h2>
+      <p class="muted">
+        Users create carts (status <b>CART</b>). When you confirm, the cart becomes an order (status <b>ORDER</b>).
+      </p>
 
-    <div class="card" style="max-width: 900px;">
-      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <button id="loadOrdersBtn" type="button">Load Orders</button>
+      <div class="actions">
+        <button id="loadOrdersBtn" type="button" class="btnPrimary">Load Orders</button>
 
-        <label style="display:flex; gap:8px; align-items:center;">
-          Status:
+        <label class="inlineLabel" for="orderStatus">
+          Status
           <select id="orderStatus">
             <option value="">All</option>
-<option value="CART">Pending (CART)</option>
-<option value="ORDER">Confirmed (ORDER)</option>
-
+            <option value="CART">Pending (CART)</option>
+            <option value="ORDER">Confirmed (ORDER)</option>
           </select>
         </label>
       </div>
 
-      <p id="ordersMsg" class="msg"></p>
-    </div>
+      <p id="ordersMsg" class="msg" role="status" aria-live="polite"></p>
+    </section>
 
-    <div id="ordersAdmin" class="card" style="max-width: 900px; margin-top: 16px;"></div>
+    <section class="card" aria-label="Orders list">
+      <div id="ordersAdmin"></div>
+    </section>
+
   </main>
 
+  <!-- ===== Footer ===== -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Admin Panel</p>
+    </div>
+  </footer>
+
+  <!-- ===== Scripts ===== -->
   <script type="module">
     import { initNav } from "./js/nav.js";
     initNav();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 
   <script type="module" src="js/admin.js"></script>

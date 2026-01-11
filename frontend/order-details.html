@@ -3,41 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Order Details</title>
+  <title>Order Details — Zaza’s Tech House</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-  <nav class="nav">
-    <a href="index.html">Shop</a>
-    <a href="cart.html">Cart</a>
-    <a href="orders.html">My Orders</a>
-    <a href="admin.html">Admin</a>
-    <a href="login.html" id="logoutLink">Logout</a>
-  </nav>
+  <!-- Header: brand + navigation -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
 
-  <main class="container">
-    <h1>Order Details</h1>
-    <p id="msg" class="msg"></p>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
 
-    <div class="card" style="max-width: 900px;">
-      <p><b>Order ID:</b> <span id="orderId">-</span></p>
-      <p><b>Date:</b> <span id="orderDate">-</span></p>
-      <p><b>Total:</b> <span id="orderTotal">-</span></p>
+        <a href="cart.html" data-auth="user">Cart</a>
+        <a href="orders.html" data-auth="user">My Orders</a>
+        <a href="admin.html" data-auth="admin">Admin</a>
+
+        <!-- nav.js switches this between Login/Logout -->
+        <a href="login.html" id="logoutLink">Login</a>
+      </nav>
     </div>
+  </header>
 
-    <h2 style="margin-top: 16px;">Items</h2>
-    <div id="items" class="card" style="max-width: 900px;"></div>
+  <!-- Main -->
+  <main class="container">
+    <header class="pageHeader">
+      <h1>Order Details</h1>
+      <p class="muted">Review the order summary and purchased items.</p>
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
+    </header>
 
-    <p style="margin-top: 16px;">
-      <a href="orders.html">← Back to My Orders</a>
-    </p>
+    <!-- Quick actions -->
+    <section class="card" aria-label="Order actions">
+      <div class="actions">
+        <a href="orders.html">← Back to My Orders</a>
+        <a href="index.html#catalog">Continue shopping</a>
+      </div>
+    </section>
+
+    <!-- Order summary -->
+    <section class="card orderSummary" aria-label="Order summary">
+      <div class="summaryRow">
+        <span><b>Order ID:</b></span>
+        <span id="orderId">-</span>
+      </div>
+
+      <div class="summaryRow">
+        <span><b>Date:</b></span>
+        <span id="orderDate">-</span>
+      </div>
+
+      <div class="summaryRow">
+        <span><b>Total:</b></span>
+        <span id="orderTotal">-</span>
+      </div>
+    </section>
+
+    <!-- Items -->
+    <section class="card" aria-label="Order items" style="margin-top:16px;">
+      <h2 style="margin-top:0;">Items</h2>
+      <div id="items"></div>
+    </section>
   </main>
 
+  <!-- Footer -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Phones • Laptops • Headphones • Tablets</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
   <script type="module">
     import { initNav } from "./js/nav.js";
     initNav();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
   <script type="module" src="js/order-details.js"></script>
 </body>
 </html>

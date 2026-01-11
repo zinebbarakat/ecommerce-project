@@ -1,8 +1,7 @@
-import { apiFetch, getSession, clearSession } from "./api.js";
+import { apiFetch, getSession } from "./api.js";
 
 const msg = document.getElementById("msg");
 const adminProductsDiv = document.getElementById("adminProducts");
-const logoutLink = document.getElementById("logoutLink");
 
 const form = document.getElementById("productForm");
 const productIdEl = document.getElementById("productId");
@@ -17,15 +16,18 @@ const clearBtn = document.getElementById("clearBtn");
 
 function requireAdmin() {
   const s = getSession();
+
   if (!s) {
     window.location.href = "login.html";
     throw new Error("Not logged in");
   }
+
   if (s.role !== "admin") {
     alert("Admin only");
     window.location.href = "index.html";
     throw new Error("Admin only");
   }
+
   return s;
 }
 
@@ -54,6 +56,11 @@ function fillForm(p) {
 function render(products) {
   adminProductsDiv.innerHTML = "";
 
+  if (!products.length) {
+    adminProductsDiv.innerHTML = "<p>No products yet.</p>";
+    return;
+  }
+
   for (const p of products) {
     const card = document.createElement("div");
     card.className = "product";
@@ -64,17 +71,20 @@ function render(products) {
       <p><b>Category:</b> ${p.category}</p>
       <p><b>Price:</b> ${p.price} €</p>
       <p><b>Stock:</b> ${p.stock}</p>
-      <div style="display:flex; gap:10px;">
-        <button class="editBtn">Edit</button>
-        <button class="deleteBtn">Delete</button>
+
+      <div class="actions" style="justify-content:flex-start;">
+        <button class="editBtn" type="button">Edit</button>
+        <button class="deleteBtn btnDanger" type="button">Delete</button>
       </div>
     `;
 
+    // Edit: put product data into the form
     card.querySelector(".editBtn").addEventListener("click", () => {
       fillForm(p);
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
+    // Delete: confirm, then call API
     card.querySelector(".deleteBtn").addEventListener("click", async () => {
       msg.textContent = "";
       if (!confirm(`Delete "${p.name}"?`)) return;
@@ -95,6 +105,7 @@ function render(products) {
 
 async function loadProducts() {
   msg.textContent = "";
+
   try {
     requireAdmin();
     const products = await apiFetch("/products");
@@ -104,6 +115,7 @@ async function loadProducts() {
   }
 }
 
+// Create / Update product
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   msg.textContent = "";
@@ -121,16 +133,27 @@ form.addEventListener("submit", async (e) => {
       long_desc: longDescEl.value.trim()
     };
 
+    // Basic validation (avoid accidental empty numbers)
+    if (!payload.name || !payload.category || !payload.image_url) {
+      throw new Error("Name, category and image URL are required.");
+    }
+    if (!Number.isFinite(payload.price) || payload.price < 0) {
+      throw new Error("Price must be a valid number (>= 0).");
+    }
+    if (!Number.isFinite(payload.stock) || payload.stock < 0) {
+      throw new Error("Stock must be a valid number (>= 0).");
+    }
+
     const id = productIdEl.value;
 
     if (!id) {
-      // create
+      // Create
       await apiFetch("/products", {
         method: "POST",
         body: JSON.stringify(payload)
       });
     } else {
-      // update
+      // Update
       await apiFetch(`/products/${id}`, {
         method: "PUT",
         body: JSON.stringify(payload)
@@ -146,11 +169,5 @@ form.addEventListener("submit", async (e) => {
 
 clearBtn.addEventListener("click", clearForm);
 
-logoutLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  clearSession();
-  window.location.href = "login.html";
-});
-
-// start
+// Start page
 loadProducts();

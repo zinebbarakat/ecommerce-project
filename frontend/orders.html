@@ -3,28 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Orders</title>
+  <title>My Orders — Zaza’s Tech House</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-  <nav class="nav">
-    <a href="index.html">Shop</a>
-    <a href="cart.html">Cart</a>
-    <a href="orders.html">My Orders</a>
-    <a href="admin.html">Admin</a>
-    <a href="login.html" id="logoutLink">Logout</a>
-  </nav>
 
+<body>
+  <!-- Header: brand + navigation -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+
+        <a href="cart.html" data-auth="user">Cart</a>
+        <a href="orders.html" data-auth="user" aria-current="page">My Orders</a>
+        <a href="admin.html" data-auth="admin">Admin</a>
+
+        <!-- nav.js switches this between Login/Logout -->
+        <a href="login.html" id="logoutLink">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
   <main class="container">
-    <h1>My Past Orders</h1>
-    <p id="msg" class="msg"></p>
-    <div id="orders" class="grid"></div>
+    <header class="pageHeader">
+      <h1>My Orders</h1>
+      <p class="muted">View your confirmed orders and open an order to see details.</p>
+    </header>
+
+    <!-- Info + actions -->
+    <section class="card" aria-label="Orders information">
+      <div class="actions">
+        <a href="index.html#catalog">Continue shopping</a>
+        <a href="cart.html" data-auth="user">Go to cart</a>
+      </div>
+
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
+
+      <p class="muted" style="margin: 10px 0 0;">
+        Note: Orders appear here after the admin confirms them.
+      </p>
+    </section>
+
+    <!-- Orders list (filled by orders.js) -->
+    <section class="card" aria-label="Orders list">
+      <div id="orders" class="grid"></div>
+    </section>
   </main>
 
+  <!-- Footer -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Phones • Laptops • Headphones • Tablets</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
   <script type="module">
     import { initNav } from "./js/nav.js";
     initNav();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
   <script type="module" src="js/orders.js"></script>
 </body>
 </html>

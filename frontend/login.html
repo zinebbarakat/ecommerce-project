@@ -3,37 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <title>Login — Zaza’s Tech House</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <nav class="nav">
-    <a href="index.html">Shop</a>
-    <a href="register.html">Register</a>
-  </nav>
 
+  <!-- ===== Header ===== -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html" aria-current="page">Login</a>
+        <a href="register.html">Register</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
   <main class="container">
-    <h1>Login</h1>
 
-    <form id="loginForm" class="card">
-      <label>
-        Username
-        <input id="username" required />
-      </label>
+    <header class="pageHeader">
+      <h1>Login</h1>
+      <p class="muted">Enter your credentials to access your account.</p>
+      <br>
+    </header>
 
-      <label>
-        Password
-        <input id="password" type="password" required />
-      </label>
+    <section class="card" style="max-width: 520px; margin: 0 auto;">
+      <form id="loginForm">
+        <label>
+          Username
+          <input id="username" required autocomplete="username" />
+        </label>
 
-      <button type="submit">Login</button>
-      <p id="msg" class="msg"></p>
-    </form>
+        <label>
+          Password
+          <input id="password" type="password" required autocomplete="current-password" />
+        </label>
+
+        <div class="actions">
+          <button type="submit" class="btnPrimary">Login</button>
+          <a href="register.html">Create an account</a>
+        </div>
+
+        <p id="msg" class="msg" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
   </main>
-<script type="module">
-  import { initNav } from "./js/nav.js";
-  initNav();
-</script>
+
+  <!-- Footer -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Phones • Laptops • Headphones • Tablets</p>
+    </div>
+  </footer>
+
+  <!-- ===== Scripts ===== -->
+  <script type="module">
+    import { initNav } from "./js/nav.js";
+    initNav();
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 
   <script type="module" src="js/login.js"></script>
 </body>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — Zaza’s Tech House</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html" aria-current="page">About</a>
+        <a href="contact.html">Contact</a>
+
+        <a href="cart.html" data-auth="user">Cart</a>
+        <a href="orders.html" data-auth="user">My Orders</a>
+        <a href="admin.html" data-auth="admin">Admin</a>
+
+        <a href="login.html" id="logoutLink">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
+  <main class="container">
+
+    <header class="pageHeader">
+      <h1>About Zaza’s Tech House</h1>
+      <p class="muted">
+        A simple ecommerce platform for browsing products, managing a cart, and tracking orders.
+      </p>
+    </header>
+
+    <article class="card" aria-label="About content">
+
+      <section aria-label="Mission">
+        <h2>Our Mission</h2>
+        <p>
+          Zaza’s Tech House is built to keep online shopping simple: a clean catalog, clear product
+          details, and an easy checkout flow. The interface is designed to work well on desktop and mobile.
+        </p>
+      </section>
+
+      <section aria-label="Features">
+        <h2>What you can do</h2>
+        <ul>
+          <li>Browse products and filter by category</li>
+          <li>Open product pages to view price, stock, and descriptions</li>
+          <li>Add items to your cart and update quantities</li>
+          <li>Checkout and track confirmed orders</li>
+        </ul>
+      </section>
+
+      <section aria-label="How it works">
+        <h2>How it works (quick overview)</h2>
+        <p>
+          The frontend communicates with a REST API built with Express. Data is stored in SQLite
+          (users, products, orders, and order items).
+        </p>
+        <p>
+          The cart is implemented as an order with status <b>CART</b>. When the admin confirms it,
+          it becomes a confirmed order with status <b>ORDER</b>.
+        </p>
+      </section>
+
+      <section aria-label="Tech stack">
+        <h2>Project Stack</h2>
+        <ul>
+          <li><b>Frontend:</b> HTML, CSS, JavaScript (modules)</li>
+          <li><b>Backend:</b> Node.js + Express</li>
+          <li><b>Database:</b> SQLite</li>
+          <li><b>Auth:</b> Simple session stored in localStorage + headers</li>
+        </ul>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Phones • Laptops • Headphones • Tablets</p>
+    </div>
+  </footer>
+
+  <!-- ===== Scripts ===== -->
+  <script type="module">
+    import { initNav } from "./js/nav.js";
+    initNav();
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>

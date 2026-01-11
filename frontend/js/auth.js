@@ -1,5 +1,6 @@
 import { apiFetch } from "./api.js";
 
+// Register a new user
 export async function registerUser({ username, password, role }) {
   return apiFetch("/auth/register", {
     method: "POST",
@@ -7,13 +8,14 @@ export async function registerUser({ username, password, role }) {
   });
 }
 
+// Login user and store session
 export async function loginUser({ username, password }) {
   const data = await apiFetch("/auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password })
   });
 
-  // ✅ store session in localStorage (used by apiFetch headers)
+  // Save session for authenticated requests
   localStorage.setItem("session", JSON.stringify(data));
   return data;
 }

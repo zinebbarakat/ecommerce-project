@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact — Zaza’s Tech House</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" aria-current="page">Contact</a>
+
+        <a href="cart.html" data-auth="user">Cart</a>
+        <a href="orders.html" data-auth="user">My Orders</a>
+        <a href="admin.html" data-auth="admin">Admin</a>
+
+        <a href="login.html" id="logoutLink">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
+  <main class="container">
+
+    <header class="pageHeader">
+      <h1>Contact Us</h1>
+      <p class="muted">
+        Have a question or feedback? Send us a message.
+      </p>
+    </header>
+
+    <article class="card" aria-label="Contact form">
+      <form id="contactForm">
+        <label>
+          Your name
+          <input id="cName" required placeholder="e.g., Zineb" />
+        </label>
+
+        <label>
+          Email
+          <input id="cEmail" type="email" required placeholder="e.g., name@email.com" />
+        </label>
+
+        <label>
+          Message
+          <textarea id="cMsg" required placeholder="Write your message..."></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="submit" class="btnPrimary">Send Message</button>
+          <button type="reset">Clear</button>
+        </div>
+
+        <p id="contactMsg" class="msg" role="status" aria-live="polite"></p>
+      </form>
+
+      <!-- Note: this form is frontend-only (no backend endpoint) -->
+    </article>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Phones • Laptops • Headphones • Tablets</p>
+    </div>
+  </footer>
+
+  <!-- ===== Scripts ===== -->
+  <script type="module">
+    import { initNav } from "./js/nav.js";
+    initNav();
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Frontend-only contact form (demo purpose)
+    const form = document.getElementById("contactForm");
+    const msg = document.getElementById("contactMsg");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      msg.style.color = "var(--text)";
+      msg.textContent = "Message sent! Thank you for contacting us.";
+      form.reset();
+    });
+  </script>
+
+</body>
+</html>

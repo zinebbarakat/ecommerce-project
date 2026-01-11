@@ -2,53 +2,136 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zaza’s Tech House</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
-  <nav class="nav">
-    <a href="index.html">Shop</a>
-    <a href="cart.html">Cart</a>
-    <a href="admin.html">Admin</a>
-    <a href="login.html" id="logoutLink">Logout</a>
-  </nav>
+  <!-- Header: brand + navigation (links are shown/hidden by nav.js) -->
+  <header class="siteHeader">
+    <div class="container headerInner">
+      <!-- Brand / logo -->
+      <a class="brand" href="index.html" aria-label="Go to home">
+        <img class="brandLogo" src="img/logo.jpeg" alt="Zaza’s Tech House logo" />
+        <span class="brandName">Zaza’s Tech House</span>
+      </a>
 
-  <main class="container">
-    <h1>Products</h1>
+      <!-- Main navigation -->
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
 
-    <div class="card">
+        <!-- Only visible when logged as user -->
+        <a href="cart.html" data-auth="user">Cart</a>
+        <a href="orders.html" data-auth="user">My Orders</a>
+
+        <!-- Only visible when logged as admin -->
+        <a href="admin.html" data-auth="admin">Admin</a>
+
+        <!-- nav.js switches this between Login/Logout -->
+        <a href="login.html" id="logoutLink">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero / banner -->
+  <section class="hero" aria-label="Welcome banner">
+    <div class="container heroInner">
+      <div class="heroText">
+        <h1>Upgrade your tech, the smart way.</h1>
+        <p>
+          Welcome to Zaza’s Tech House — browse phones, laptops, headphones, and tablets.
+          Filter products, view details, and build your cart.
+        </p>
+
+        <div class="heroActions">
+          <a href="#catalog" class="btnPrimaryLink">Shop Now</a>
+          <a href="about.html" class="btnGhostLink">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main content -->
+  <main class="container" id="catalog">
+    <!-- Page intro -->
+    <header class="pageHeader">
+      <h2>Product Catalog</h2>
+      <p class="muted">Use the filters to quickly find what you want.</p>
+    </header>
+
+    <!-- Filters -->
+    <section class="card" aria-label="Product filters">
       <h3>Filter by category</h3>
 
-      <div class="filters">
-        <label class="check">
-          <input type="checkbox" class="catCheck" value="Phones" />
-          Phones
-        </label>
+      <!-- products.js reads .catCheck and triggers load -->
+      <form class="filters" onsubmit="return false;">
+        <fieldset class="filterGroup">
+          <legend class="srOnly">Select categories</legend>
 
-        <label class="check">
-          <input type="checkbox" class="catCheck" value="Laptops" />
-          Laptops
-        </label>
+          <label class="check">
+            <input type="checkbox" class="catCheck" value="Phones" />
+            Phones
+          </label>
 
-        <label class="check">
-          <input type="checkbox" class="catCheck" value="Headphones" />
-          Headphones
-        </label>
+          <label class="check">
+            <input type="checkbox" class="catCheck" value="Laptops" />
+            Laptops
+          </label>
 
-        <button id="loadBtn">Load Products</button>
-      </div>
+          <label class="check">
+            <input type="checkbox" class="catCheck" value="Headphones" />
+            Headphones
+          </label>
 
-      <p id="msg" class="msg"></p>
-    </div>
+          <label class="check">
+            <input type="checkbox" class="catCheck" value="Tablets" />
+            Tablets
+          </label>
+        </fieldset>
 
-    <div id="products" class="grid"></div>
+        <div class="filterActions">
+          <button type="button" id="loadBtn" class="btnPrimary">Load Products</button>
+          <button type="button" id="clearBtn">Clear</button>
+        </div>
+
+        <!-- products.js writes messages here -->
+        <p id="msg" class="msg" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Results info -->
+    <section class="card" aria-label="Catalog results info">
+      <p class="muted resultsInfo">
+        <b id="resultsCount">0</b> product(s) shown
+      </p>
+    </section>
+
+    <!-- Products grid rendered by products.js -->
+    <section aria-label="Products list">
+      <div id="products" class="grid"></div>
+    </section>
   </main>
 
+  <!-- Footer -->
+  <footer class="siteFooter">
+    <div class="container footerInner">
+      <p>© <span id="year"></span> Zaza’s Tech House. All rights reserved.</p>
+      <p class="muted">Phones • Laptops • Headphones • Tablets</p>
+    </div>
+  </footer>
+
+  <!-- Header logic (login/logout + role links) -->
   <script type="module">
     import { initNav } from "./js/nav.js";
     initNav();
+
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
+  <!-- Catalog logic -->
   <script type="module" src="js/products.js"></script>
 </body>
 </html>
