@@ -123,7 +123,7 @@ Before running this project, make sure you have:
 ### 1. Clone or Download the Project
 
 ```bash
-cd C:\Users\Pablo\PhpStormProjects\ecommerce-project
+https://github.com/zinebbarakat/ecommerce-project.git
 ```
 
 ### 2. Install Backend Dependencies
